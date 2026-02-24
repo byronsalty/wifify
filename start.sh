@@ -30,8 +30,18 @@ fi
 
 PYTHON="$VENV_DIR/bin/python3"
 
-# If no args, show usage
+# Show our own usage for no args, -h, --help, or common mistakes
+show_usage=0
 if [ $# -eq 0 ]; then
+    show_usage=1
+elif [ "$1" = "-h" ] || [ "$1" = "--help" ]; then
+    show_usage=1
+elif [ "$1" = "--label" ] || [ "$1" = "--duration" ] || [ "$1" = "--output" ]; then
+    echo -e "${YELLOW}Hint: put 'run' before options — e.g. ./start.sh run $*${RESET}"
+    echo ""
+    show_usage=1
+fi
+if [ "$show_usage" -eq 1 ]; then
     echo -e "${BOLD}${BLUE}wifify — WiFi/Network Diagnostics${RESET}"
     echo ""
     echo -e "${BOLD}Usage:${RESET}"
