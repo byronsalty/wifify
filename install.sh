@@ -58,7 +58,8 @@ fi
 
 # Set up venv
 info "Setting up Python environment..."
-if [ ! -d "$INSTALL_DIR/venv" ]; then
+if [ ! -f "$INSTALL_DIR/venv/bin/pip" ]; then
+    rm -rf "$INSTALL_DIR/venv"
     python3 -m venv "$INSTALL_DIR/venv"
 fi
 "$INSTALL_DIR/venv/bin/pip" install --quiet --upgrade rich
