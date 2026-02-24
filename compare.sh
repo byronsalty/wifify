@@ -14,6 +14,12 @@ RESET='\033[0m'
 
 # Ensure venv exists
 if [ ! -d "$VENV_DIR" ]; then
+    if ! python3 -c "import ensurepip" >/dev/null 2>&1; then
+        PY_MINOR=$(python3 -c 'import sys; print(sys.version_info.minor)')
+        echo -e "${BOLD}${YELLOW}python3-venv is required but not installed.${RESET}"
+        echo -e "  Install it with: sudo apt install python3.${PY_MINOR}-venv"
+        exit 1
+    fi
     echo -e "${BOLD}Setting up virtual environment...${RESET}"
     python3 -m venv "$VENV_DIR"
     "$VENV_DIR/bin/pip" install --quiet rich

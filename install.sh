@@ -26,8 +26,8 @@ echo -e "${BOLD}${BLUE}wifify installer${RESET}"
 echo ""
 
 # Check dependencies
-command -v git >/dev/null 2>&1 || fail "git is required but not installed."
-command -v python3 >/dev/null 2>&1 || fail "python3 is required but not installed."
+command -v git >/dev/null 2>&1 || fail "git is required. Install it with your package manager."
+command -v python3 >/dev/null 2>&1 || fail "python3 is required. Install it with your package manager."
 
 # Check Python version (need 3.7+)
 PY_VERSION=$(python3 -c 'import sys; print(f"{sys.version_info.major}.{sys.version_info.minor}")')
@@ -35,6 +35,12 @@ PY_MAJOR=$(echo "$PY_VERSION" | cut -d. -f1)
 PY_MINOR=$(echo "$PY_VERSION" | cut -d. -f2)
 if [ "$PY_MAJOR" -lt 3 ] || { [ "$PY_MAJOR" -eq 3 ] && [ "$PY_MINOR" -lt 7 ]; }; then
     fail "Python 3.7+ is required (found $PY_VERSION)."
+fi
+
+# Check that python3-venv is available (common missing package on Debian/Ubuntu)
+if ! python3 -c "import ensurepip" >/dev/null 2>&1; then
+    echo ""
+    fail "python3-venv is required but not installed.\n\n  Install it with:\n    sudo apt install python3.${PY_MINOR}-venv\n\n  Then re-run this installer."
 fi
 
 # Clone or update
