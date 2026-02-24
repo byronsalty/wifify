@@ -26,7 +26,15 @@ Designed to help you understand *why* your WiFi feels slow, not just *how fast* 
 - Plain-english diagnosis of issues found
 - Results saved to JSON for comparison
 
-## Quick start
+## Install
+
+One-liner:
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/byronsalty/wifify/main/install.sh | bash
+```
+
+Or clone manually:
 
 ```bash
 git clone https://github.com/byronsalty/wifify.git
@@ -34,7 +42,11 @@ cd wifify
 ./start.sh run
 ```
 
-The script auto-creates a Python virtual environment and installs dependencies on first run.
+Either way, a Python virtual environment is created automatically and dependencies are installed on first run. You can customize the install location with `WIFIFY_DIR`:
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/byronsalty/wifify/main/install.sh | WIFIFY_DIR=~/tools/wifify bash
+```
 
 ## Usage
 
