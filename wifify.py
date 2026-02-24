@@ -11,6 +11,8 @@ import statistics
 import subprocess
 import sys
 import time
+import urllib.error
+import urllib.request
 from datetime import datetime
 from pathlib import Path
 from typing import Any, Optional
@@ -52,6 +54,26 @@ MONITOR_INTERVAL = 5  # seconds between monitoring cycles
 SIGNAL_SAMPLE_INTERVAL = 30  # seconds between WiFi signal samples
 
 console = Console()
+
+# ---------------------------------------------------------------------------
+# Community / Firebase config
+# ---------------------------------------------------------------------------
+
+FIREBASE_PROJECT_ID = "YOUR_PROJECT_ID"  # TODO: set after creating Firebase project
+FIREBASE_API_KEY = "YOUR_API_KEY"  # TODO: set from Firebase console (public web API key)
+FIRESTORE_BASE_URL = f"https://firestore.googleapis.com/v1/projects/{FIREBASE_PROJECT_ID}/databases/(default)/documents"
+AUTH_URL = f"https://identitytoolkit.googleapis.com/v1/accounts:signUp?key={FIREBASE_API_KEY}"
+
+VALID_NETWORKS = ["public", "private"]
+VALID_CONNECTIONS = ["wifi", "wired"]
+
+LEADERBOARD_METRICS = {
+    "download": ("download_mbps", "Download (Mbps)", False),
+    "upload": ("upload_mbps", "Upload (Mbps)", False),
+    "latency": ("gateway_latency_avg", "Gateway Latency (ms)", True),
+    "rpm": ("rpm", "Responsiveness (RPM)", False),
+    "bufferbloat": ("bufferbloat_ratio", "Bufferbloat Ratio", True),
+}
 
 # ---------------------------------------------------------------------------
 # Subprocess helper
@@ -1210,6 +1232,317 @@ def compare_results(file1: str, file2: str) -> None:
 
 
 # ---------------------------------------------------------------------------
+# Community: Firebase helpers
+# ---------------------------------------------------------------------------
+
+
+def _firebase_configured() -> bool:
+    return FIREBASE_PROJECT_ID != "YOUR_PROJECT_ID" and FIREBASE_API_KEY != "YOUR_API_KEY"
+
+
+def firebase_anon_auth() -> str:
+    """Authenticate anonymously with Firebase, return an ID token."""
+    data = json.dumps({"returnSecureToken": True}).encode()
+    req = urllib.request.Request(AUTH_URL, data=data, method="POST")
+    req.add_header("Content-Type", "application/json")
+    try:
+        with urllib.request.urlopen(req, timeout=10) as resp:
+            result = json.loads(resp.read().decode())
+            return result["idToken"]
+    except urllib.error.HTTPError as e:
+        body = e.read().decode() if e.fp else ""
+        raise RuntimeError(f"Firebase auth failed ({e.code}): {body}") from e
+    except urllib.error.URLError as e:
+        raise RuntimeError(f"Network error during auth: {e.reason}") from e
+
+
+def to_firestore_value(value: Any) -> dict:
+    """Convert a Python value to Firestore REST API value format."""
+    if value is None:
+        return {"nullValue": None}
+    if isinstance(value, bool):
+        return {"booleanValue": value}
+    if isinstance(value, int):
+        return {"integerValue": str(value)}
+    if isinstance(value, float):
+        return {"doubleValue": value}
+    if isinstance(value, str):
+        return {"stringValue": value}
+    return {"stringValue": str(value)}
+
+
+def from_firestore_value(fv: dict) -> Any:
+    """Convert a Firestore REST API value dict to a Python value."""
+    if "nullValue" in fv:
+        return None
+    if "booleanValue" in fv:
+        return fv["booleanValue"]
+    if "integerValue" in fv:
+        return int(fv["integerValue"])
+    if "doubleValue" in fv:
+        return fv["doubleValue"]
+    if "stringValue" in fv:
+        return fv["stringValue"]
+    if "timestampValue" in fv:
+        return fv["timestampValue"]
+    return None
+
+
+def extract_upload_payload(results: dict) -> dict:
+    """Extract curated fields from a full results JSON for upload."""
+    meta = results.get("meta", {})
+    conn = results.get("connection", {})
+    speed = results.get("speed", {})
+    ws = results.get("wifi_signal") or {}
+    dns = results.get("dns", {})
+    gw_ping = results.get("baseline_latency", {}).get("gateway", {})
+    mon = results.get("monitoring_summary", {})
+    inet_stats = mon.get("internet_stats", {})
+
+    inet_loss_pct = 0.0
+    total = mon.get("gateway_total", 0)
+    if total > 0:
+        inet_loss_pct = round(mon.get("internet_loss_count", 0) / total * 100, 2)
+
+    # Map connection type to wifi/wired
+    conn_type = conn.get("type", "unknown")
+    connection = "wifi" if conn_type == "wifi" else "wired"
+
+    return {
+        "client_timestamp": meta.get("timestamp"),
+        "connection": connection,
+        "os": meta.get("os_version", "unknown"),
+        "download_mbps": speed.get("dl_throughput_mbps"),
+        "upload_mbps": speed.get("ul_throughput_mbps"),
+        "rpm": speed.get("responsiveness_rpm"),
+        "bufferbloat_ratio": speed.get("bufferbloat_ratio"),
+        "gateway_latency_avg": gw_ping.get("avg_ms"),
+        "gateway_latency_p95": mon.get("gateway_p95_ms"),
+        "gateway_packet_loss_pct": gw_ping.get("packet_loss_pct", 0.0),
+        "internet_latency_avg": inet_stats.get("avg"),
+        "internet_packet_loss_pct": inet_loss_pct,
+        "dns_avg_ms": dns.get("avg_time_ms"),
+        "monitoring_duration_min": mon.get("duration_min", 0),
+        "anomaly_count": mon.get("anomaly_count", 0),
+        "rssi": ws.get("rssi_dbm"),
+        "snr": ws.get("snr_db"),
+        "channel_band": ws.get("channel_band"),
+    }
+
+
+def upload_result(results_file: str, handle: str, network: str, isp: Optional[str]) -> None:
+    """Upload results to the community Firestore."""
+    if not _firebase_configured():
+        console.print("[red]Firebase is not configured. Set FIREBASE_PROJECT_ID and FIREBASE_API_KEY in wifify.py.[/]")
+        return
+
+    with open(results_file) as f:
+        results = json.load(f)
+
+    payload = extract_upload_payload(results)
+    payload["handle"] = handle
+    payload["network"] = network
+    payload["isp"] = isp
+
+    # Convert to Firestore document format
+    fields = {k: to_firestore_value(v) for k, v in payload.items()}
+
+    console.print("  Authenticating...", style="dim")
+    try:
+        token = firebase_anon_auth()
+    except RuntimeError as e:
+        console.print(f"[red]Auth error: {e}[/]")
+        return
+
+    console.print("  Uploading...", style="dim")
+    doc_body = json.dumps({"fields": fields}).encode()
+    url = f"{FIRESTORE_BASE_URL}/results"
+    req = urllib.request.Request(url, data=doc_body, method="POST")
+    req.add_header("Content-Type", "application/json")
+    req.add_header("Authorization", f"Bearer {token}")
+
+    try:
+        with urllib.request.urlopen(req, timeout=15) as resp:
+            result = json.loads(resp.read().decode())
+            doc_name = result.get("name", "")
+            doc_id = doc_name.split("/")[-1] if doc_name else "unknown"
+            console.print(f"\n  [bold green]Uploaded![/] Document ID: {doc_id}")
+            console.print(f"  Category: [bold]{network} {payload['connection']}[/]")
+            console.print(f"  View leaderboard: [dim]./start.sh leaderboard --network {network} --connection {payload['connection']}[/]")
+    except urllib.error.HTTPError as e:
+        body = e.read().decode() if e.fp else ""
+        console.print(f"[red]Upload failed ({e.code}): {body}[/]")
+    except urllib.error.URLError as e:
+        console.print(f"[red]Network error: {e.reason}[/]")
+
+
+def prompt_upload_after_run(filepath: str) -> None:
+    """Interactively prompt the user to upload results after a run."""
+    if not _firebase_configured():
+        return
+    if not sys.stdin.isatty():
+        return
+
+    console.print()
+    answer = input("  Upload to community leaderboard? (y/n): ").strip().lower()
+    if answer not in ("y", "yes"):
+        return
+
+    handle = input("  Your display name (handle): ").strip()
+    if not handle:
+        console.print("  [yellow]Skipped — handle is required.[/]")
+        return
+    if len(handle) > 30:
+        console.print("  [yellow]Skipped — handle must be 30 characters or less.[/]")
+        return
+
+    console.print("\n  Is this a public or private network?")
+    console.print("    1. private (your home, office, etc.)")
+    console.print("    2. public (hotel, coffee shop, hotspot, etc.)")
+    choice = input("  Select (1/2): ").strip()
+    if choice == "1":
+        network = "private"
+    elif choice == "2":
+        network = "public"
+    else:
+        console.print("  [yellow]Skipped — invalid selection.[/]")
+        return
+
+    isp = input("  ISP name (optional, press Enter to skip): ").strip() or None
+
+    upload_result(filepath, handle, network, isp)
+
+
+# ---------------------------------------------------------------------------
+# Community: Leaderboard
+# ---------------------------------------------------------------------------
+
+
+def fetch_leaderboard(network: str, connection: str, metric_field: str, limit: int) -> list[dict]:
+    """Fetch top results from Firestore for a given network/connection combo."""
+    # Determine sort direction
+    lower_is_better = False
+    for _, (field, _, lib) in LEADERBOARD_METRICS.items():
+        if field == metric_field:
+            lower_is_better = lib
+            break
+    direction = "ASCENDING" if lower_is_better else "DESCENDING"
+
+    query = {
+        "structuredQuery": {
+            "from": [{"collectionId": "results"}],
+            "where": {
+                "compositeFilter": {
+                    "op": "AND",
+                    "filters": [
+                        {
+                            "fieldFilter": {
+                                "field": {"fieldPath": "network"},
+                                "op": "EQUAL",
+                                "value": {"stringValue": network},
+                            }
+                        },
+                        {
+                            "fieldFilter": {
+                                "field": {"fieldPath": "connection"},
+                                "op": "EQUAL",
+                                "value": {"stringValue": connection},
+                            }
+                        },
+                    ],
+                }
+            },
+            "orderBy": [{"field": {"fieldPath": metric_field}, "direction": direction}],
+            "limit": limit,
+        }
+    }
+
+    url = f"{FIRESTORE_BASE_URL}:runQuery"
+    data = json.dumps(query).encode()
+    req = urllib.request.Request(url, data=data, method="POST")
+    req.add_header("Content-Type", "application/json")
+
+    try:
+        with urllib.request.urlopen(req, timeout=15) as resp:
+            raw = json.loads(resp.read().decode())
+    except urllib.error.HTTPError as e:
+        body = e.read().decode() if e.fp else ""
+        console.print(f"[red]Leaderboard query failed ({e.code}): {body}[/]")
+        return []
+    except urllib.error.URLError as e:
+        console.print(f"[red]Network error: {e.reason}[/]")
+        return []
+
+    entries = []
+    for item in raw:
+        doc = item.get("document")
+        if not doc:
+            continue
+        fields = doc.get("fields", {})
+        entries.append({k: from_firestore_value(v) for k, v in fields.items()})
+
+    return entries
+
+
+def compute_percentile_rank(
+    network: str, connection: str, field: str, value: float, lower_is_better: bool
+) -> Optional[float]:
+    """Compute what percentile the given value falls at."""
+    all_entries = fetch_leaderboard(network, connection, field, limit=1000)
+    if not all_entries:
+        return None
+
+    values = [e.get(field) for e in all_entries if e.get(field) is not None]
+    if not values:
+        return None
+
+    if lower_is_better:
+        worse_count = sum(1 for v in values if v > value)
+    else:
+        worse_count = sum(1 for v in values if v < value)
+
+    return round((worse_count / len(values)) * 100, 1)
+
+
+def display_leaderboard(
+    entries: list[dict],
+    metric_key: str,
+    metric_label: str,
+    lower_is_better: bool,
+    network: str,
+    connection: str,
+    user_value: Optional[float] = None,
+    user_percentile: Optional[float] = None,
+) -> None:
+    """Render leaderboard as a rich table."""
+    title = f"Leaderboard: {metric_label} ({network} {connection})"
+    table = Table(title=title, expand=True, show_edge=False)
+    table.add_column("#", style="dim", width=4)
+    table.add_column("Handle", style="bold", width=18)
+    table.add_column(metric_label, justify="right", width=16)
+    table.add_column("ISP", width=16)
+    table.add_column("Date", style="dim", width=12)
+
+    for i, entry in enumerate(entries, 1):
+        val = entry.get(metric_key)
+        val_str = f"{val:.1f}" if isinstance(val, (int, float)) else "—"
+        handle = entry.get("handle", "?")
+        isp = entry.get("isp") or "—"
+        ts = entry.get("client_timestamp", "")
+        date_str = ts[:10] if len(ts) >= 10 else "—"
+        table.add_row(str(i), handle, val_str, isp, date_str)
+
+    console.print(table)
+
+    if user_value is not None:
+        console.print()
+        val_str = f"{user_value:.1f}"
+        console.print(f"  Your result: [bold]{val_str}[/]")
+        if user_percentile is not None:
+            console.print(f"  Better than [bold green]{user_percentile}%[/] of {network} {connection} uploads")
+
+
+# ---------------------------------------------------------------------------
 # CLI
 # ---------------------------------------------------------------------------
 
@@ -1229,6 +1562,19 @@ def build_parser() -> argparse.ArgumentParser:
     cmp_parser = subparsers.add_parser("compare", help="Compare two result files")
     cmp_parser.add_argument("file1", type=str, help="First results JSON file")
     cmp_parser.add_argument("file2", type=str, help="Second results JSON file")
+
+    upload_parser = subparsers.add_parser("upload", help="Upload results to community")
+    upload_parser.add_argument("file", type=str, help="Results JSON file")
+    upload_parser.add_argument("--handle", type=str, help="Display name")
+    upload_parser.add_argument("--network", type=str, choices=VALID_NETWORKS, help="public or private network")
+    upload_parser.add_argument("--isp", type=str, default=None, help="ISP name (optional)")
+
+    lb_parser = subparsers.add_parser("leaderboard", help="View community leaderboards")
+    lb_parser.add_argument("--network", type=str, default="private", choices=VALID_NETWORKS)
+    lb_parser.add_argument("--connection", type=str, default="wifi", choices=VALID_CONNECTIONS)
+    lb_parser.add_argument("--metric", type=str, default="download", choices=LEADERBOARD_METRICS.keys())
+    lb_parser.add_argument("--limit", type=int, default=20)
+    lb_parser.add_argument("--compare", metavar="FILE", type=str, help="Show your percentile rank")
 
     return parser
 
@@ -1318,6 +1664,12 @@ def run_diagnostics(label: Optional[str], duration: float, output_dir: Optional[
     console.print(f"\n  Results saved to: [bold green]{filepath}[/]")
     console.print(f"  Compare with:  [dim]./compare.sh {filepath} <other_file.json>[/]")
 
+    # Offer to upload to community
+    try:
+        prompt_upload_after_run(str(filepath))
+    except (KeyboardInterrupt, EOFError):
+        pass
+
 
 def main() -> None:
     parser = build_parser()
@@ -1355,6 +1707,48 @@ def main() -> None:
             console.print(f"[red]Error: File not found: {args.file2}[/]")
             sys.exit(1)
         compare_results(args.file1, args.file2)
+
+    elif args.command == "upload":
+        if not os.path.isfile(args.file):
+            console.print(f"[red]Error: File not found: {args.file}[/]")
+            sys.exit(1)
+        handle = args.handle
+        if not handle:
+            handle = input("Enter your display name (handle): ").strip()
+            if not handle:
+                console.print("[red]Handle is required.[/]")
+                sys.exit(1)
+        network = args.network
+        if not network:
+            network = input("Network type — public or private? ").strip().lower()
+            if network not in VALID_NETWORKS:
+                console.print(f"[red]Invalid network type. Choose from: {', '.join(VALID_NETWORKS)}[/]")
+                sys.exit(1)
+        upload_result(args.file, handle, network, args.isp)
+
+    elif args.command == "leaderboard":
+        metric_field, metric_label, lower_is_better = LEADERBOARD_METRICS[args.metric]
+        entries = fetch_leaderboard(args.network, args.connection, metric_field, args.limit)
+
+        user_value = None
+        user_percentile = None
+        if args.compare:
+            if not os.path.isfile(args.compare):
+                console.print(f"[red]Error: File not found: {args.compare}[/]")
+                sys.exit(1)
+            with open(args.compare) as f:
+                user_results = json.load(f)
+            payload = extract_upload_payload(user_results)
+            user_value = payload.get(metric_field)
+            if user_value is not None:
+                user_percentile = compute_percentile_rank(
+                    args.network, args.connection, metric_field, user_value, lower_is_better
+                )
+
+        display_leaderboard(
+            entries, args.metric, metric_label, lower_is_better,
+            args.network, args.connection, user_value, user_percentile,
+        )
 
 
 if __name__ == "__main__":

@@ -133,6 +133,29 @@ Phase 3: Summary
 
 **Bufferbloat** is when your router's buffers are too large, causing latency to spike under load (downloads, video calls, uploads). If your idle latency is 20ms but jumps to 500ms during a speed test, that's 25x bufferbloat. Fix it by enabling SQM/fq_codel on your router (available on OpenWrt, DD-WRT, Ubiquiti, Mikrotik, and others).
 
+## Community
+
+Upload your results and compare against others. Results are grouped into "weight classes" by connection type (wifi/wired) and network type (public/private) so comparisons are apples-to-apples.
+
+```bash
+# Upload results after a run (you'll also be prompted automatically)
+./start.sh upload results/wifify_wifi_*.json --handle myname --network private
+
+# View the leaderboard
+./start.sh leaderboard --network private --connection wifi --metric download
+
+# See where you rank
+./start.sh leaderboard --network private --connection wifi --compare results/wifify_wifi_*.json
+```
+
+**Weight classes:**
+- **Network**: `public` (hotel, coffee shop, shared) or `private` (your own network)
+- **Connection**: `wifi` or `wired` (auto-detected from your results)
+
+**Available metrics:** `download`, `upload`, `latency`, `rpm`, `bufferbloat`
+
+After each `run`, you'll be prompted to upload — just enter a handle and pick public or private. No account needed.
+
 ## Platform support
 
 | Feature | macOS | Linux |
