@@ -93,6 +93,40 @@ def run_cmd(cmd: list[str], timeout: int = 30) -> tuple[int, str, str]:
 
 
 # ---------------------------------------------------------------------------
+# IP / location detection
+# ---------------------------------------------------------------------------
+
+
+def fetch_public_ip_info() -> dict:
+    """Fetch public IP and approximate location via ipinfo.io (free, no key required)."""
+    try:
+        req = urllib.request.Request(
+            "https://ipinfo.io/json",
+            headers={"Accept": "application/json", "User-Agent": "wifify/1.0"},
+        )
+        with urllib.request.urlopen(req, timeout=5) as resp:
+            data = json.loads(resp.read().decode())
+        loc = data.get("loc", "")  # "lat,lon"
+        return {
+            "public_ip": data.get("ip"),
+            "city": data.get("city"),
+            "region": data.get("region"),
+            "country": data.get("country"),
+            "loc": loc if loc else None,
+            "isp": data.get("org"),
+        }
+    except Exception:
+        return {
+            "public_ip": None,
+            "city": None,
+            "region": None,
+            "country": None,
+            "loc": None,
+            "isp": None,
+        }
+
+
+# ---------------------------------------------------------------------------
 # Connection detection
 # ---------------------------------------------------------------------------
 
@@ -1124,9 +1158,22 @@ def compare_results(file1: str, file2: str) -> None:
 
     label_a = a["meta"]["label"]
     label_b = b["meta"]["label"]
+    plat_a = a["meta"].get("platform", "")
+    plat_b = b["meta"].get("platform", "")
+    loc_a = a["meta"].get("location") or {}
+    loc_b = b["meta"].get("location") or {}
+
+    def _header_detail(plat: str, loc: dict) -> str:
+        parts = []
+        if plat:
+            parts.append(plat)
+        city = loc.get("city")
+        if city:
+            parts.append(city)
+        return f" [dim]({', '.join(parts)})[/]" if parts else ""
 
     console.print(Panel(
-        f"[bold]{label_a.upper()}[/] vs [bold]{label_b.upper()}[/]",
+        f"[bold]{label_a.upper()}[/]{_header_detail(plat_a, loc_a)} vs [bold]{label_b.upper()}[/]{_header_detail(plat_b, loc_b)}",
         title="[bold blue]wifify — Comparison[/]",
         border_style="blue",
     ))
@@ -1308,10 +1355,17 @@ def extract_upload_payload(results: dict) -> dict:
     conn_type = conn.get("type", "unknown")
     connection = "wifi" if conn_type == "wifi" else "wired"
 
+    loc = meta.get("location") or {}
+
     return {
         "client_timestamp": meta.get("timestamp"),
+        "platform": meta.get("platform", "unknown"),
         "connection": connection,
         "os": meta.get("os_version", "unknown"),
+        "public_ip": meta.get("public_ip"),
+        "city": loc.get("city"),
+        "region": loc.get("region"),
+        "country": loc.get("country"),
         "download_mbps": speed.get("dl_throughput_mbps"),
         "upload_mbps": speed.get("ul_throughput_mbps"),
         "rpm": speed.get("responsiveness_rpm"),
@@ -1616,6 +1670,17 @@ def run_diagnostics(label: Optional[str], duration: float, output_dir: Optional[
     console.print(f"  Gateway: {connection['gateway']}")
     console.print(f"  Label: [bold]{auto_label}[/]")
 
+    # Detect public IP and location
+    ip_info = fetch_public_ip_info()
+    plat = "macos" if IS_MACOS else ("linux" if IS_LINUX else "unknown")
+
+    if ip_info.get("public_ip"):
+        location_parts = [p for p in [ip_info.get("city"), ip_info.get("region"), ip_info.get("country")] if p]
+        location_str = ", ".join(location_parts) if location_parts else None
+        console.print(f"  Public IP: {ip_info['public_ip']}")
+        if location_str:
+            console.print(f"  Location: {location_str}")
+
     results: dict[str, Any] = {
         "meta": {
             "version": "1.0.0",
@@ -1623,8 +1688,15 @@ def run_diagnostics(label: Optional[str], duration: float, output_dir: Optional[
             "timestamp_epoch": time.time(),
             "label": auto_label,
             "hostname": os.uname().nodename,
+            "platform": plat,
             "os_version": f"macOS {mac_ver}" if mac_ver else (platform.platform() if IS_LINUX else "unknown"),
             "duration_min": duration,
+            "public_ip": ip_info.get("public_ip"),
+            "location": {
+                "city": ip_info.get("city"),
+                "region": ip_info.get("region"),
+                "country": ip_info.get("country"),
+            } if ip_info.get("public_ip") else None,
         },
         "connection": connection,
     }

@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>wifify needs location access to read your WiFi network name (SSID) and signal strength.</string>
+	<key>NSLocalNetworkUsageDescription</key>
+	<string>wifify pings your local gateway to measure network latency.</string>
+</dict>
+</plist>

@@ -1,0 +1,525 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 77;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		01AFF19389E0A1B638F1B1AE /* LeaderboardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7F39200342AF09C27272D184 /* LeaderboardView.swift */; };
+		076CAFAE294A594048A7157B /* Verdict.swift in Sources */ = {isa = PBXBuildFile; fileRef = A283FABE328D3795566FBBE9 /* Verdict.swift */; };
+		120FC24B9411A6D615E473B5 /* CompareView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6D376DDE93167C53704F358B /* CompareView.swift */; };
+		206A47B212C60247999BD861 /* SummaryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CD3CFB23D0DA606E3DE4A720 /* SummaryView.swift */; };
+		2EA8DEDAF9C96CCF8B85D5C7 /* FirebaseAuthService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 600BE1AA0C908035F826AE09 /* FirebaseAuthService.swift */; };
+		30B254D487D864252EB4B9B0 /* HomeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E00DAC25B0105D7A39BFE9D2 /* HomeView.swift */; };
+		30B49610FDE54F9C869453A5 /* TracerouteResult.swift in Sources */ = {isa = PBXBuildFile; fileRef = F299E88483FC93311939AFB6 /* TracerouteResult.swift */; };
+		30E21ABCDDED097843F590B4 /* FirebaseConfig.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1A6B3940459DB3DC3A727F8 /* FirebaseConfig.swift */; };
+		314E40C4AF73B72C02995B79 /* SpeedResult.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4E79D9498C4E361229D70570 /* SpeedResult.swift */; };
+		35BD0324754A33A0F315923A /* SpeedTestService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 63B9F1F3211984BE9C7563A3 /* SpeedTestService.swift */; };
+		376A97FFB9F77308AC1D94DC /* PingResult.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4AEC83EE4EAC4272FD688079 /* PingResult.swift */; };
+		446B9D1E0C665615F0E9E0BE /* KeepAwakeModifier.swift in Sources */ = {isa = PBXBuildFile; fileRef = 342764DBE19530D1CB068CBE /* KeepAwakeModifier.swift */; };
+		45DDCD1590D9B7AA56BB5051 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = ED3FD7221786C733F94584BD /* ContentView.swift */; };
+		4763D762B6425AF7AC1640D9 /* StatisticsHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 084351EC19B2A843FC457158 /* StatisticsHelper.swift */; };
+		537FAC14BF2430D10714169B /* UploadView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1BE282729A06948765C31437 /* UploadView.swift */; };
+		55C6C68B7546201FCA6D0AC7 /* IPInfoService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9DE8DB86AFC2A85F0434421F /* IPInfoService.swift */; };
+		59C4B9AC4EB7E9C78BE034F6 /* DiagnosticsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6CED4D3ECB6F12EF288288C2 /* DiagnosticsView.swift */; };
+		60B573512F1CE0B4A679A968 /* DiagnosticsEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = 302378399DA8F87BFEBF1BBE /* DiagnosticsEngine.swift */; };
+		660563B1D1BB58BC8DFDE2BA /* ConnectionDetector.swift in Sources */ = {isa = PBXBuildFile; fileRef = 81FE8401B8275C623A14AF67 /* ConnectionDetector.swift */; };
+		6F989A53EE945D6AB71A0F4F /* SimplePing.m in Sources */ = {isa = PBXBuildFile; fileRef = 89874FCD5D6462DFF710F37F /* SimplePing.m */; };
+		701EE972E62A13860D3E77B4 /* JSONExporter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 38200695AE3B82128217F33F /* JSONExporter.swift */; };
+		74E5F992A5776C1D55F480E9 /* FirestoreService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 48CF10F06C977088B70A17D4 /* FirestoreService.swift */; };
+		8B23C4C6E2E5B017944DC406 /* WiFiService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7080936647C21BFF6B23DBCE /* WiFiService.swift */; };
+		93A5B6E4E8E86FE1B046F8DF /* MetaInfo.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6E74B28DA471D5E1E46A77C0 /* MetaInfo.swift */; };
+		98C30157437E7122A7525228 /* WiFiSignalInfo.swift in Sources */ = {isa = PBXBuildFile; fileRef = 69DE6CDB37582FE81E5D805E /* WiFiSignalInfo.swift */; };
+		A5B9C562E6FD1F7C84A58AFB /* MonitoringSummary.swift in Sources */ = {isa = PBXBuildFile; fileRef = FD299D5B47560095343FE97D /* MonitoringSummary.swift */; };
+		A66599B4EFC6E7FA5058753E /* PastResultsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F2E038C0BFAC94160C9BB248 /* PastResultsView.swift */; };
+		ACDD27BD5BC5A4F4FD2B69BE /* ConnectionInfo.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3EACEBB40D902680C8FCEBD4 /* ConnectionInfo.swift */; };
+		AD120915BC306CE75AAF8A65 /* DiagnosticsResult.swift in Sources */ = {isa = PBXBuildFile; fileRef = 052D82742D63A3450C5DBAAA /* DiagnosticsResult.swift */; };
+		B5D70C4A42D8DDB3B1B8D6F7 /* PingService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4F190AA2668E9BFB8EC5015F /* PingService.swift */; };
+		B93F927E9AEE89CFB2518B63 /* VerdictGenerator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E3CD20CCAFFA8F7400699A2 /* VerdictGenerator.swift */; };
+		C6420D1EF28178CEBB48E76F /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = A9E09A235D7096EF6DF36485 /* Assets.xcassets */; };
+		C9D14E365F2CC8EEB0C4A63E /* WififyApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = A74A9885C59889E786D3B57C /* WififyApp.swift */; };
+		D8AF70B42E4DDF916CFD6A0D /* DNSResult.swift in Sources */ = {isa = PBXBuildFile; fileRef = 53AD3593D6670AE9A159AAD7 /* DNSResult.swift */; };
+		E63E44E7D299F2E271A1880F /* DNSService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 381B0770B15F5FB2D71F0328 /* DNSService.swift */; };
+		FC51E2017261278CA6FB1700 /* MonitoringSample.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1350BF52037D95F318AA0EB4 /* MonitoringSample.swift */; };
+		FEF29233CCBD94384B0D9202 /* ConfigurationView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AD3B6CE579765B9962F7EC5F /* ConfigurationView.swift */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXFileReference section */
+		052D82742D63A3450C5DBAAA /* DiagnosticsResult.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DiagnosticsResult.swift; sourceTree = "<group>"; };
+		084351EC19B2A843FC457158 /* StatisticsHelper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StatisticsHelper.swift; sourceTree = "<group>"; };
+		0F8F591A011B1E88F92D7490 /* Wifify-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "Wifify-Bridging-Header.h"; sourceTree = "<group>"; };
+		1350BF52037D95F318AA0EB4 /* MonitoringSample.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MonitoringSample.swift; sourceTree = "<group>"; };
+		1BE282729A06948765C31437 /* UploadView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UploadView.swift; sourceTree = "<group>"; };
+		2E5C3C2B3BFBA39C3FE99D8C /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
+		302378399DA8F87BFEBF1BBE /* DiagnosticsEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DiagnosticsEngine.swift; sourceTree = "<group>"; };
+		342764DBE19530D1CB068CBE /* KeepAwakeModifier.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeepAwakeModifier.swift; sourceTree = "<group>"; };
+		381B0770B15F5FB2D71F0328 /* DNSService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DNSService.swift; sourceTree = "<group>"; };
+		38200695AE3B82128217F33F /* JSONExporter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = JSONExporter.swift; sourceTree = "<group>"; };
+		3EACEBB40D902680C8FCEBD4 /* ConnectionInfo.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConnectionInfo.swift; sourceTree = "<group>"; };
+		48CF10F06C977088B70A17D4 /* FirestoreService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FirestoreService.swift; sourceTree = "<group>"; };
+		4AEC83EE4EAC4272FD688079 /* PingResult.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PingResult.swift; sourceTree = "<group>"; };
+		4E79D9498C4E361229D70570 /* SpeedResult.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpeedResult.swift; sourceTree = "<group>"; };
+		4F190AA2668E9BFB8EC5015F /* PingService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PingService.swift; sourceTree = "<group>"; };
+		53AD3593D6670AE9A159AAD7 /* DNSResult.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DNSResult.swift; sourceTree = "<group>"; };
+		57A6D5CC8A4F9DF2C2EA2A67 /* Wifify.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = Wifify.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		600BE1AA0C908035F826AE09 /* FirebaseAuthService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FirebaseAuthService.swift; sourceTree = "<group>"; };
+		63B9F1F3211984BE9C7563A3 /* SpeedTestService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpeedTestService.swift; sourceTree = "<group>"; };
+		69DE6CDB37582FE81E5D805E /* WiFiSignalInfo.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WiFiSignalInfo.swift; sourceTree = "<group>"; };
+		6CED4D3ECB6F12EF288288C2 /* DiagnosticsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DiagnosticsView.swift; sourceTree = "<group>"; };
+		6D376DDE93167C53704F358B /* CompareView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CompareView.swift; sourceTree = "<group>"; };
+		6E74B28DA471D5E1E46A77C0 /* MetaInfo.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MetaInfo.swift; sourceTree = "<group>"; };
+		7080936647C21BFF6B23DBCE /* WiFiService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WiFiService.swift; sourceTree = "<group>"; };
+		7F39200342AF09C27272D184 /* LeaderboardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LeaderboardView.swift; sourceTree = "<group>"; };
+		81FE8401B8275C623A14AF67 /* ConnectionDetector.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConnectionDetector.swift; sourceTree = "<group>"; };
+		89874FCD5D6462DFF710F37F /* SimplePing.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = SimplePing.m; sourceTree = "<group>"; };
+		8E3CD20CCAFFA8F7400699A2 /* VerdictGenerator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VerdictGenerator.swift; sourceTree = "<group>"; };
+		9DE8DB86AFC2A85F0434421F /* IPInfoService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IPInfoService.swift; sourceTree = "<group>"; };
+		A283FABE328D3795566FBBE9 /* Verdict.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Verdict.swift; sourceTree = "<group>"; };
+		A74A9885C59889E786D3B57C /* WififyApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WififyApp.swift; sourceTree = "<group>"; };
+		A9E09A235D7096EF6DF36485 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		AD3B6CE579765B9962F7EC5F /* ConfigurationView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConfigurationView.swift; sourceTree = "<group>"; };
+		B1A6B3940459DB3DC3A727F8 /* FirebaseConfig.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FirebaseConfig.swift; sourceTree = "<group>"; };
+		C1867DBF8BA4366E6B782527 /* Wifify.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = Wifify.entitlements; sourceTree = "<group>"; };
+		CD3CFB23D0DA606E3DE4A720 /* SummaryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SummaryView.swift; sourceTree = "<group>"; };
+		E00DAC25B0105D7A39BFE9D2 /* HomeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeView.swift; sourceTree = "<group>"; };
+		E330599E4661873773836D17 /* SimplePing.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = SimplePing.h; sourceTree = "<group>"; };
+		ED3FD7221786C733F94584BD /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
+		F299E88483FC93311939AFB6 /* TracerouteResult.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TracerouteResult.swift; sourceTree = "<group>"; };
+		F2E038C0BFAC94160C9BB248 /* PastResultsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PastResultsView.swift; sourceTree = "<group>"; };
+		FD299D5B47560095343FE97D /* MonitoringSummary.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MonitoringSummary.swift; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXGroup section */
+		2F5E362C77A766E7C9E9F7FA /* Engine */ = {
+			isa = PBXGroup;
+			children = (
+				302378399DA8F87BFEBF1BBE /* DiagnosticsEngine.swift */,
+				084351EC19B2A843FC457158 /* StatisticsHelper.swift */,
+				8E3CD20CCAFFA8F7400699A2 /* VerdictGenerator.swift */,
+			);
+			path = Engine;
+			sourceTree = "<group>";
+		};
+		3173278B0F0ADB4652A4CE35 /* SimplePing */ = {
+			isa = PBXGroup;
+			children = (
+				E330599E4661873773836D17 /* SimplePing.h */,
+				89874FCD5D6462DFF710F37F /* SimplePing.m */,
+			);
+			path = SimplePing;
+			sourceTree = "<group>";
+		};
+		439C605A4BCF8E610DC8D740 /* Firebase */ = {
+			isa = PBXGroup;
+			children = (
+				600BE1AA0C908035F826AE09 /* FirebaseAuthService.swift */,
+				B1A6B3940459DB3DC3A727F8 /* FirebaseConfig.swift */,
+				48CF10F06C977088B70A17D4 /* FirestoreService.swift */,
+			);
+			path = Firebase;
+			sourceTree = "<group>";
+		};
+		452E76EC6E5D24940CCB6968 /* Wifify */ = {
+			isa = PBXGroup;
+			children = (
+				0F8F591A011B1E88F92D7490 /* Wifify-Bridging-Header.h */,
+				D9586E7983D3EFC4625D61E4 /* App */,
+				2F5E362C77A766E7C9E9F7FA /* Engine */,
+				439C605A4BCF8E610DC8D740 /* Firebase */,
+				FC69E0BD983E5AC83483B235 /* Models */,
+				82E358D0C2CA9A85EED5447C /* Resources */,
+				E3061AEACA866A86CEE7A992 /* Services */,
+				3173278B0F0ADB4652A4CE35 /* SimplePing */,
+				562C44FCE38A4D753DFBC329 /* Utilities */,
+				67487CA49F98EA41B8C68CBF /* Views */,
+			);
+			path = Wifify;
+			sourceTree = "<group>";
+		};
+		562C44FCE38A4D753DFBC329 /* Utilities */ = {
+			isa = PBXGroup;
+			children = (
+				38200695AE3B82128217F33F /* JSONExporter.swift */,
+				342764DBE19530D1CB068CBE /* KeepAwakeModifier.swift */,
+			);
+			path = Utilities;
+			sourceTree = "<group>";
+		};
+		67487CA49F98EA41B8C68CBF /* Views */ = {
+			isa = PBXGroup;
+			children = (
+				6D376DDE93167C53704F358B /* CompareView.swift */,
+				AD3B6CE579765B9962F7EC5F /* ConfigurationView.swift */,
+				6CED4D3ECB6F12EF288288C2 /* DiagnosticsView.swift */,
+				E00DAC25B0105D7A39BFE9D2 /* HomeView.swift */,
+				7F39200342AF09C27272D184 /* LeaderboardView.swift */,
+				F2E038C0BFAC94160C9BB248 /* PastResultsView.swift */,
+				CD3CFB23D0DA606E3DE4A720 /* SummaryView.swift */,
+				1BE282729A06948765C31437 /* UploadView.swift */,
+			);
+			path = Views;
+			sourceTree = "<group>";
+		};
+		82E358D0C2CA9A85EED5447C /* Resources */ = {
+			isa = PBXGroup;
+			children = (
+				A9E09A235D7096EF6DF36485 /* Assets.xcassets */,
+				2E5C3C2B3BFBA39C3FE99D8C /* Info.plist */,
+				C1867DBF8BA4366E6B782527 /* Wifify.entitlements */,
+			);
+			path = Resources;
+			sourceTree = "<group>";
+		};
+		B8B05BD7A373B57320F3892C /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				57A6D5CC8A4F9DF2C2EA2A67 /* Wifify.app */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		CEA86262D44339282F54377F = {
+			isa = PBXGroup;
+			children = (
+				452E76EC6E5D24940CCB6968 /* Wifify */,
+				B8B05BD7A373B57320F3892C /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		D9586E7983D3EFC4625D61E4 /* App */ = {
+			isa = PBXGroup;
+			children = (
+				ED3FD7221786C733F94584BD /* ContentView.swift */,
+				A74A9885C59889E786D3B57C /* WififyApp.swift */,
+			);
+			path = App;
+			sourceTree = "<group>";
+		};
+		E3061AEACA866A86CEE7A992 /* Services */ = {
+			isa = PBXGroup;
+			children = (
+				81FE8401B8275C623A14AF67 /* ConnectionDetector.swift */,
+				381B0770B15F5FB2D71F0328 /* DNSService.swift */,
+				9DE8DB86AFC2A85F0434421F /* IPInfoService.swift */,
+				4F190AA2668E9BFB8EC5015F /* PingService.swift */,
+				63B9F1F3211984BE9C7563A3 /* SpeedTestService.swift */,
+				7080936647C21BFF6B23DBCE /* WiFiService.swift */,
+			);
+			path = Services;
+			sourceTree = "<group>";
+		};
+		FC69E0BD983E5AC83483B235 /* Models */ = {
+			isa = PBXGroup;
+			children = (
+				3EACEBB40D902680C8FCEBD4 /* ConnectionInfo.swift */,
+				052D82742D63A3450C5DBAAA /* DiagnosticsResult.swift */,
+				53AD3593D6670AE9A159AAD7 /* DNSResult.swift */,
+				6E74B28DA471D5E1E46A77C0 /* MetaInfo.swift */,
+				1350BF52037D95F318AA0EB4 /* MonitoringSample.swift */,
+				FD299D5B47560095343FE97D /* MonitoringSummary.swift */,
+				4AEC83EE4EAC4272FD688079 /* PingResult.swift */,
+				4E79D9498C4E361229D70570 /* SpeedResult.swift */,
+				F299E88483FC93311939AFB6 /* TracerouteResult.swift */,
+				A283FABE328D3795566FBBE9 /* Verdict.swift */,
+				69DE6CDB37582FE81E5D805E /* WiFiSignalInfo.swift */,
+			);
+			path = Models;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		1403A0CB7B4D453F40C555BD /* Wifify */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = C2DA7C036B6E63EED1B305C6 /* Build configuration list for PBXNativeTarget "Wifify" */;
+			buildPhases = (
+				B6E221CD5DCC4D01ADE6C24D /* Sources */,
+				F3B878C8EEE5FBB622BC2DCF /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = Wifify;
+			packageProductDependencies = (
+			);
+			productName = Wifify;
+			productReference = 57A6D5CC8A4F9DF2C2EA2A67 /* Wifify.app */;
+			productType = "com.apple.product-type.application";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		568D48E2BD321E46E3891230 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = YES;
+				LastUpgradeCheck = 1600;
+			};
+			buildConfigurationList = 2116984C797747FA300BC699 /* Build configuration list for PBXProject "Wifify" */;
+			compatibilityVersion = "Xcode 14.0";
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				Base,
+				en,
+			);
+			mainGroup = CEA86262D44339282F54377F;
+			minimizedProjectReferenceProxies = 1;
+			preferredProjectObjectVersion = 77;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				1403A0CB7B4D453F40C555BD /* Wifify */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		F3B878C8EEE5FBB622BC2DCF /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				C6420D1EF28178CEBB48E76F /* Assets.xcassets in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		B6E221CD5DCC4D01ADE6C24D /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				120FC24B9411A6D615E473B5 /* CompareView.swift in Sources */,
+				FEF29233CCBD94384B0D9202 /* ConfigurationView.swift in Sources */,
+				660563B1D1BB58BC8DFDE2BA /* ConnectionDetector.swift in Sources */,
+				ACDD27BD5BC5A4F4FD2B69BE /* ConnectionInfo.swift in Sources */,
+				45DDCD1590D9B7AA56BB5051 /* ContentView.swift in Sources */,
+				D8AF70B42E4DDF916CFD6A0D /* DNSResult.swift in Sources */,
+				E63E44E7D299F2E271A1880F /* DNSService.swift in Sources */,
+				60B573512F1CE0B4A679A968 /* DiagnosticsEngine.swift in Sources */,
+				AD120915BC306CE75AAF8A65 /* DiagnosticsResult.swift in Sources */,
+				59C4B9AC4EB7E9C78BE034F6 /* DiagnosticsView.swift in Sources */,
+				2EA8DEDAF9C96CCF8B85D5C7 /* FirebaseAuthService.swift in Sources */,
+				30E21ABCDDED097843F590B4 /* FirebaseConfig.swift in Sources */,
+				74E5F992A5776C1D55F480E9 /* FirestoreService.swift in Sources */,
+				30B254D487D864252EB4B9B0 /* HomeView.swift in Sources */,
+				55C6C68B7546201FCA6D0AC7 /* IPInfoService.swift in Sources */,
+				701EE972E62A13860D3E77B4 /* JSONExporter.swift in Sources */,
+				446B9D1E0C665615F0E9E0BE /* KeepAwakeModifier.swift in Sources */,
+				01AFF19389E0A1B638F1B1AE /* LeaderboardView.swift in Sources */,
+				93A5B6E4E8E86FE1B046F8DF /* MetaInfo.swift in Sources */,
+				FC51E2017261278CA6FB1700 /* MonitoringSample.swift in Sources */,
+				A5B9C562E6FD1F7C84A58AFB /* MonitoringSummary.swift in Sources */,
+				A66599B4EFC6E7FA5058753E /* PastResultsView.swift in Sources */,
+				376A97FFB9F77308AC1D94DC /* PingResult.swift in Sources */,
+				B5D70C4A42D8DDB3B1B8D6F7 /* PingService.swift in Sources */,
+				6F989A53EE945D6AB71A0F4F /* SimplePing.m in Sources */,
+				314E40C4AF73B72C02995B79 /* SpeedResult.swift in Sources */,
+				35BD0324754A33A0F315923A /* SpeedTestService.swift in Sources */,
+				4763D762B6425AF7AC1640D9 /* StatisticsHelper.swift in Sources */,
+				206A47B212C60247999BD861 /* SummaryView.swift in Sources */,
+				30B49610FDE54F9C869453A5 /* TracerouteResult.swift in Sources */,
+				537FAC14BF2430D10714169B /* UploadView.swift in Sources */,
+				076CAFAE294A594048A7157B /* Verdict.swift in Sources */,
+				B93F927E9AEE89CFB2518B63 /* VerdictGenerator.swift in Sources */,
+				8B23C4C6E2E5B017944DC406 /* WiFiService.swift in Sources */,
+				98C30157437E7122A7525228 /* WiFiSignalInfo.swift in Sources */,
+				C9D14E365F2CC8EEB0C4A63E /* WififyApp.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin XCBuildConfiguration section */
+		4FDB8DFF77E7C7E516FEF15E /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
+				SWIFT_VERSION = 5.0;
+			};
+			name = Release;
+		};
+		7CD4D58528E64D1161429BA8 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CLANG_ENABLE_MODULES = YES;
+				CODE_SIGN_ENTITLEMENTS = Wifify/Resources/Wifify.entitlements;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				CURRENT_PROJECT_VERSION = 1;
+				INFOPLIST_FILE = Wifify/Resources/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.byronsalty.wifify;
+				SDKROOT = iphoneos;
+				SWIFT_OBJC_BRIDGING_HEADER = "Wifify/Wifify-Bridging-Header.h";
+				SWIFT_VERSION = 5.9;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		7FEE15342F83E66423DA8714 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CLANG_ENABLE_MODULES = YES;
+				CODE_SIGN_ENTITLEMENTS = Wifify/Resources/Wifify.entitlements;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				CURRENT_PROJECT_VERSION = 1;
+				INFOPLIST_FILE = Wifify/Resources/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.byronsalty.wifify;
+				SDKROOT = iphoneos;
+				SWIFT_OBJC_BRIDGING_HEADER = "Wifify/Wifify-Bridging-Header.h";
+				SWIFT_VERSION = 5.9;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+		F879C9F6C671948FF157EE66 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"$(inherited)",
+					"DEBUG=1",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 5.0;
+			};
+			name = Debug;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		2116984C797747FA300BC699 /* Build configuration list for PBXProject "Wifify" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				F879C9F6C671948FF157EE66 /* Debug */,
+				4FDB8DFF77E7C7E516FEF15E /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		C2DA7C036B6E63EED1B305C6 /* Build configuration list for PBXNativeTarget "Wifify" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				7CD4D58528E64D1161429BA8 /* Debug */,
+				7FEE15342F83E66423DA8714 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = 568D48E2BD321E46E3891230 /* Project object */;
+}
