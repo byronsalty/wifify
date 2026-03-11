@@ -1,0 +1,184 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+# Config-driven release script
+# Reads release-config.json from project root to determine what to update.
+
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+PROJECT_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
+CONFIG_FILE="$PROJECT_ROOT/release-config.json"
+
+VERSION="${1:-}"
+
+if [ -z "$VERSION" ] || [ "$VERSION" = "--help" ] || [ "$VERSION" = "-h" ]; then
+    echo "Usage: bin/release <version>"
+    echo ""
+    echo "Create a tagged release, push to origin, and trigger production deploy."
+    echo "Version must be semver format (e.g. 0.5.2 or 0.5.2.1 for patches)."
+    echo ""
+    echo "Current version: $(cat "$PROJECT_ROOT/VERSION")"
+    echo ""
+    if [ -f "$CONFIG_FILE" ]; then
+        echo "Config: $CONFIG_FILE"
+    else
+        echo "Config: none (will only update VERSION file)"
+    fi
+    exit 0
+fi
+
+TAG="v${VERSION}"
+TODAY=$(date +%Y-%m-%d)
+
+# Validate version format (semver, with optional 4th patch segment)
+if ! echo "$VERSION" | grep -qE '^[0-9]+\.[0-9]+\.[0-9]+(\.[0-9]+)?$'; then
+    echo "Error: Version must be semver (e.g. 1.2.3 or 1.2.3.1)"
+    exit 1
+fi
+
+# Check that tag doesn't already exist
+if git -C "$PROJECT_ROOT" rev-parse "$TAG" >/dev/null 2>&1; then
+    echo "Error: Tag ${TAG} already exists."
+    exit 1
+fi
+
+# Load config (defaults if no config file)
+if [ -f "$CONFIG_FILE" ]; then
+    CHANGELOG=$(jq -r '.changelog // false' "$CONFIG_FILE")
+    DEFAULT_BRANCH=$(jq -r '.default_branch // "main"' "$CONFIG_FILE")
+    VERSION_FILES_COUNT=$(jq '.version_files | length' "$CONFIG_FILE")
+else
+    CHANGELOG="false"
+    DEFAULT_BRANCH="main"
+    VERSION_FILES_COUNT=0
+fi
+
+echo "==> Releasing v${VERSION}..."
+
+# 0. Pull latest from origin
+echo "  > Pulling latest from origin..."
+if ! git -C "$PROJECT_ROOT" pull --ff-only origin "$DEFAULT_BRANCH"; then
+    echo "Error: Could not fast-forward to origin/$DEFAULT_BRANCH. Resolve conflicts first."
+    exit 1
+fi
+
+# 1. Ensure dependencies are up to date
+echo "  > Syncing dependencies..."
+just -f "$PROJECT_ROOT/justfile" setup 2>/dev/null || true
+
+# 2. Run tests before touching anything
+echo "  > Running test suite..."
+if ! just -f "$PROJECT_ROOT/justfile" test; then
+    echo "Error: Tests failed. Fix them before releasing."
+    exit 1
+fi
+echo "  > Tests passed."
+
+# 3. Generate changelog if enabled
+RELEASE_NOTES=""
+if [ "$CHANGELOG" = "true" ]; then
+    echo "  > Finding previous tag..."
+    LAST_TAG=$(git -C "$PROJECT_ROOT" tag -l "v*" --sort=-creatordate -n0 | head -n1 || true)
+    echo "  > Last tag: ${LAST_TAG:-none}"
+
+    echo "  > Gathering git history..."
+    if [ -z "$LAST_TAG" ]; then
+        GIT_LOG=$(git -C "$PROJECT_ROOT" log --oneline -30)
+        DIFF_STAT=$(git -C "$PROJECT_ROOT" diff --stat HEAD~10 2>/dev/null || echo "No diff available")
+    else
+        GIT_LOG=$(git -C "$PROJECT_ROOT" log --oneline "${LAST_TAG}..HEAD")
+        DIFF_STAT=$(git -C "$PROJECT_ROOT" diff --stat "${LAST_TAG}..HEAD")
+    fi
+    echo "  > Found $(echo "$GIT_LOG" | wc -l | tr -d ' ') commits"
+
+    echo "  > Calling Claude for release notes..."
+    PROMPT="You are writing release notes for a changelog. Given these git commits and diff stats, write a concise markdown changelog entry. Use these categories as needed: Breaking Changes, New Features, Bug Fixes, Other Changes. Only include categories that apply. Do NOT include a header with the version/date — just the categorized bullet points. Keep descriptions short (one line each). Here are the commits:
+
+${GIT_LOG}
+
+File changes:
+${DIFF_STAT}"
+
+    NOTES_FILE=$(mktemp)
+    claude -p "$PROMPT" --model sonnet --dangerously-skip-permissions > "$NOTES_FILE" 2>&1 || true
+    RELEASE_NOTES=$(cat "$NOTES_FILE")
+    rm -f "$NOTES_FILE"
+
+    if [ -z "$RELEASE_NOTES" ]; then
+        echo "  > Warning: Claude returned empty. Using commit log as fallback."
+        RELEASE_NOTES="$GIT_LOG"
+    else
+        echo "  > Release notes generated."
+    fi
+fi
+
+# 4. Update VERSION file
+echo "  > Updating VERSION file..."
+echo "$VERSION" > "$PROJECT_ROOT/VERSION"
+FILES_TO_COMMIT="VERSION"
+
+# 5. Update configured version files
+for i in $(seq 0 $((VERSION_FILES_COUNT - 1))); do
+    FILE_PATH=$(jq -r ".version_files[$i].path" "$CONFIG_FILE")
+    FILE_TYPE=$(jq -r ".version_files[$i].type // empty" "$CONFIG_FILE")
+    SED_PATTERN=$(jq -r ".version_files[$i].sed // empty" "$CONFIG_FILE")
+
+    FULL_PATH="$PROJECT_ROOT/$FILE_PATH"
+
+    if [ ! -f "$FULL_PATH" ]; then
+        echo "  > Warning: $FILE_PATH not found, skipping"
+        continue
+    fi
+
+    if [ -n "$SED_PATTERN" ]; then
+        RESOLVED_SED=$(echo "$SED_PATTERN" | sed "s/VERSION/$VERSION/g")
+        echo "  > Updating $FILE_PATH (sed)..."
+        sed -i '' "$RESOLVED_SED" "$FULL_PATH"
+    elif [ "$FILE_TYPE" = "xcode_pbxproj" ]; then
+        echo "  > Updating $FILE_PATH (Xcode MARKETING_VERSION)..."
+        sed -i '' "s/MARKETING_VERSION = [0-9][0-9.]*;/MARKETING_VERSION = ${VERSION};/g" "$FULL_PATH"
+    else
+        echo "  > Warning: $FILE_PATH has no sed pattern or known type, skipping"
+        continue
+    fi
+
+    FILES_TO_COMMIT="$FILES_TO_COMMIT $FILE_PATH"
+done
+
+# 6. Update CHANGELOG.md if enabled
+if [ "$CHANGELOG" = "true" ] && [ -f "$PROJECT_ROOT/CHANGELOG.md" ]; then
+    echo "  > Updating CHANGELOG.md..."
+    TMPFILE=$(mktemp)
+    ENTRY_HEADER="## v${VERSION} - ${TODAY}"
+    {
+        sed -n '1,/^## \[Unreleased\]/p' "$PROJECT_ROOT/CHANGELOG.md"
+        echo ""
+        echo "$ENTRY_HEADER"
+        echo ""
+        echo "$RELEASE_NOTES"
+        echo ""
+        sed '1,/^## \[Unreleased\]/d' "$PROJECT_ROOT/CHANGELOG.md"
+    } > "$TMPFILE"
+    mv "$TMPFILE" "$PROJECT_ROOT/CHANGELOG.md"
+    FILES_TO_COMMIT="$FILES_TO_COMMIT CHANGELOG.md"
+fi
+
+# 7. Commit and tag
+echo "  > Committing..."
+cd "$PROJECT_ROOT"
+git add $FILES_TO_COMMIT
+git commit -m "Release v${VERSION}"
+
+echo "  > Tagging ${TAG}..."
+git tag -a "${TAG}" -m "Release ${VERSION}"
+
+# 8. Push
+echo "  > Pushing to origin..."
+git push origin "$DEFAULT_BRANCH" "${TAG}"
+
+echo ""
+echo "==> Released v${VERSION}!"
+REMOTE_URL=$(git remote get-url origin 2>/dev/null || echo "")
+if [ -n "$REMOTE_URL" ]; then
+    REPO=$(echo "$REMOTE_URL" | sed 's|.*github.com[:/]||;s|\.git$||')
+    echo "    https://github.com/${REPO}/releases/tag/${TAG}"
+fi
