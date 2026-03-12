@@ -66,6 +66,7 @@ AUTH_URL = f"https://identitytoolkit.googleapis.com/v1/accounts:signUp?key={FIRE
 
 VALID_NETWORKS = ["public", "private"]
 VALID_CONNECTIONS = ["wifi", "wired"]
+VALID_CLIENTS = ["python", "ios"]
 
 LEADERBOARD_METRICS = {
     "download": ("download_mbps", "Download (Mbps)", False),
@@ -1358,6 +1359,7 @@ def extract_upload_payload(results: dict) -> dict:
     loc = meta.get("location") or {}
 
     return {
+        "client": meta.get("client", "python"),
         "client_timestamp": meta.get("timestamp"),
         "platform": meta.get("platform", "unknown"),
         "connection": connection,
@@ -1450,17 +1452,26 @@ def prompt_upload_after_run(filepath: str) -> None:
         console.print("  [yellow]Skipped — handle must be 30 characters or less.[/]")
         return
 
-    console.print("\n  Is this a public or private network?")
-    console.print("    1. private (your home, office, etc.)")
-    console.print("    2. public (hotel, coffee shop, hotspot, etc.)")
-    choice = input("  Select (1/2): ").strip()
-    if choice == "1":
-        network = "private"
-    elif choice == "2":
-        network = "public"
+    # Check if network type was already set during the run
+    with open(filepath) as f:
+        saved = json.load(f)
+    saved_network = saved.get("meta", {}).get("network")
+
+    if saved_network in VALID_NETWORKS:
+        network = saved_network
+        console.print(f"  Network: [bold]{network}[/] (from run)")
     else:
-        console.print("  [yellow]Skipped — invalid selection.[/]")
-        return
+        console.print("\n  Is this a public or private network?")
+        console.print("    1. private (your home, office, etc.)")
+        console.print("    2. public (hotel, coffee shop, hotspot, etc.)")
+        choice = input("  Select (1/2): ").strip()
+        if choice == "1":
+            network = "private"
+        elif choice == "2":
+            network = "public"
+        else:
+            console.print("  [yellow]Skipped — invalid selection.[/]")
+            return
 
     isp = input("  ISP name (optional, press Enter to skip): ").strip() or None
 
@@ -1612,6 +1623,7 @@ def build_parser() -> argparse.ArgumentParser:
     run_parser.add_argument("--label", type=str, default=None, help="Label for this run (default: auto-detected)")
     run_parser.add_argument("--duration", type=float, default=15, help="Monitoring duration in minutes (default: 15)")
     run_parser.add_argument("--output", type=str, default=None, help="Output directory for results JSON (default: results/)")
+    run_parser.add_argument("--network", type=str, default=None, choices=VALID_NETWORKS, help="Network type: public (hotel, coffee shop) or private (home, office)")
 
     cmp_parser = subparsers.add_parser("compare", help="Compare two result files")
     cmp_parser.add_argument("file1", type=str, help="First results JSON file")
@@ -1622,6 +1634,12 @@ def build_parser() -> argparse.ArgumentParser:
     upload_parser.add_argument("--handle", type=str, help="Display name")
     upload_parser.add_argument("--network", type=str, choices=VALID_NETWORKS, help="public or private network")
     upload_parser.add_argument("--isp", type=str, default=None, help="ISP name (optional)")
+
+    update_parser = subparsers.add_parser("update", help="Update metadata on a saved result file")
+    update_parser.add_argument("file", type=str, help="Results JSON file to update")
+    update_parser.add_argument("--label", type=str, default=None, help="Update the run label")
+    update_parser.add_argument("--network", type=str, default=None, choices=VALID_NETWORKS, help="Update network type: public or private")
+    update_parser.add_argument("--client", type=str, default=None, choices=VALID_CLIENTS, help="Update client type: python or ios")
 
     lb_parser = subparsers.add_parser("leaderboard", help="View community leaderboards")
     lb_parser.add_argument("--network", type=str, default="private", choices=VALID_NETWORKS)
@@ -1638,7 +1656,7 @@ def build_parser() -> argparse.ArgumentParser:
 # ---------------------------------------------------------------------------
 
 
-def run_diagnostics(label: Optional[str], duration: float, output_dir: Optional[str]) -> None:
+def run_diagnostics(label: Optional[str], duration: float, output_dir: Optional[str], network: Optional[str] = None) -> None:
     # Default output dir to results/ next to this script
     if output_dir is None:
         output_dir = str(Path(__file__).resolve().parent / "results")
@@ -1669,6 +1687,8 @@ def run_diagnostics(label: Optional[str], duration: float, output_dir: Optional[
     console.print(f"  Connection: [bold]{connection['type']}[/] via {connection['interface']} ({connection['hardware_port']})")
     console.print(f"  Gateway: {connection['gateway']}")
     console.print(f"  Label: [bold]{auto_label}[/]")
+    if network:
+        console.print(f"  Network: [bold]{network}[/]")
 
     # Detect public IP and location
     ip_info = fetch_public_ip_info()
@@ -1684,12 +1704,14 @@ def run_diagnostics(label: Optional[str], duration: float, output_dir: Optional[
     results: dict[str, Any] = {
         "meta": {
             "version": "1.0.0",
+            "client": "python",
             "timestamp": now.isoformat(),
             "timestamp_epoch": time.time(),
             "label": auto_label,
             "hostname": os.uname().nodename,
             "platform": plat,
             "os_version": f"macOS {mac_ver}" if mac_ver else (platform.platform() if IS_LINUX else "unknown"),
+            "network": network,
             "duration_min": duration,
             "public_ip": ip_info.get("public_ip"),
             "location": {
@@ -1767,7 +1789,7 @@ def main() -> None:
         signal.signal(signal.SIGINT, handle_sigint)
 
         try:
-            run_diagnostics(args.label, args.duration, args.output)
+            run_diagnostics(args.label, args.duration, args.output, args.network)
         except KeyboardInterrupt:
             console.print("[yellow]Partial results may have been saved.[/]")
 
@@ -1797,6 +1819,34 @@ def main() -> None:
                 console.print(f"[red]Invalid network type. Choose from: {', '.join(VALID_NETWORKS)}[/]")
                 sys.exit(1)
         upload_result(args.file, handle, network, args.isp)
+
+    elif args.command == "update":
+        if not os.path.isfile(args.file):
+            console.print(f"[red]Error: File not found: {args.file}[/]")
+            sys.exit(1)
+        if not args.label and not args.network and not args.client:
+            console.print("[red]Nothing to update. Use --label, --network, and/or --client.[/]")
+            sys.exit(1)
+        with open(args.file) as f:
+            data = json.load(f)
+        changed = []
+        if args.label:
+            old_label = data.get("meta", {}).get("label")
+            data.setdefault("meta", {})["label"] = args.label
+            changed.append(f"label: {old_label} -> {args.label}")
+        if args.network:
+            old_network = data.get("meta", {}).get("network")
+            data.setdefault("meta", {})["network"] = args.network
+            changed.append(f"network: {old_network} -> {args.network}")
+        if args.client:
+            old_client = data.get("meta", {}).get("client")
+            data.setdefault("meta", {})["client"] = args.client
+            changed.append(f"client: {old_client} -> {args.client}")
+        with open(args.file, "w") as f:
+            json.dump(data, f, indent=2, default=str)
+        for c in changed:
+            console.print(f"  [green]Updated[/] {c}")
+        console.print(f"  Saved: [bold]{args.file}[/]")
 
     elif args.command == "leaderboard":
         metric_field, metric_label, lower_is_better = LEADERBOARD_METRICS[args.metric]

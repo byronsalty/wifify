@@ -20,6 +20,11 @@ upload *ARGS:
 leaderboard *ARGS:
     ./start.sh leaderboard {{ARGS}}
 
+# Update metadata on a saved result file
+[group('run')]
+update *ARGS:
+    ./start.sh update {{ARGS}}
+
 # Set up Python venv and install dependencies
 [group('dev')]
 setup:
